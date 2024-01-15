@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+<style>
+
+
+h1 {
+  color: white;
+  text-align: center;
+}
+
+p {
+  font-family: verdana;
+  font-size: 20px;
+}
+.score{
+	font-weight:700;
+}
+
+i{
+	cursor: pointer;
+    font-size: 1.2rem;
+}
+
+.cont-div{
+	background-color: #f6fffd;
+    box-shadow: 0rem 0rem 1.1rem 0.1rem #25ac91c7;
+}
+
+.btn-outline-warning, .btn-outline-warning:disabled{
+	color:#644c06;
+}
+
+</style>
+<script>
+var max_marks = 120;
+var max_ques = 120;
+var ques_covered = 0;
+var total_correct_score = 0;
+var total_correct_questions = 0;
+var total_incorrect_questions = 0;
+var total_incorrect_score = 0;
+var total_skipped = 0;
+var total_score = 0;
+var inc = 1;
+var dec = (1/4);
+
+let action_stack = [];
+
+
+$(document).ready(function(){
+	document.getElementById('max_ques_value').innerHTML = max_ques;
+	document.getElementById('c_btn').disabled = true;
+	document.getElementById('w_btn').disabled = true;
+	document.getElementById('s_btn').disabled = true;
+	document.getElementById('undo_btn').disabled = true;
+});
+
+function start_calc(){
+	ques_covered = 1;
+	total_correct_questions = 0;
+    total_correct_score = 0;
+    total_incorrect_questions = 0;
+    total_incorrect_score = 0;
+    total_skipped = 0;
+    total_score = 0;
+    
+    document.getElementById('qnoCounter').innerHTML = ques_covered;
+    document.getElementById('cqCounter').innerHTML = total_correct_questions;
+    document.getElementById('wqCounter').innerHTML = total_incorrect_questions;
+    document.getElementById('sqCounter').innerHTML = total_skipped;
+    document.getElementById('current_score').innerHTML = total_score;
+    
+    document.getElementById('c_btn').disabled = false;
+    document.getElementById('w_btn').disabled = false;
+    document.getElementById('s_btn').disabled = false;
+    
+    
+}
+
+function add_correct(){
+	ques_covered += 1;
+    total_correct_questions += 1;
+    total_score += Number(inc);
+    
+    document.getElementById('qnoCounter').innerHTML = ques_covered;
+    document.getElementById('cqCounter').innerHTML = total_correct_questions;
+    document.getElementById('current_score').innerHTML = total_score;
+    
+    action_stack.push('inc');
+    
+    if(ques_covered >= 2){
+    	document.getElementById('undo_btn').disabled = false;
+    }else{
+    	document.getElementById('undo_btn').disabled = true;
+    }
+    
+    is_test_over();
+}
+
+function add_incorrect(){
+	ques_covered += 1;
+    total_incorrect_questions += 1;
+    total_score = total_score - (dec);
+    
+    document.getElementById('qnoCounter').innerHTML = ques_covered;
+    document.getElementById('wqCounter').innerHTML = total_incorrect_questions;
+    document.getElementById('current_score').innerHTML = total_score;
+    
+    action_stack.push('dec');
+    
+    if(ques_covered >= 2){
+    	document.getElementById('undo_btn').disabled = false;
+    }else{
+    	document.getElementById('undo_btn').disabled = true;
+    }
+    
+    is_test_over();
+}
+
+function skip(){
+	ques_covered += 1;
+    total_skipped += 1;
+    
+    document.getElementById('qnoCounter').innerHTML = ques_covered;
+    document.getElementById('sqCounter').innerHTML = total_skipped;
+    
+    action_stack.push('skip');
+    
+    if(ques_covered >= 2){
+    	document.getElementById('undo_btn').disabled = false;
+    }else{
+    	document.getElementById('undo_btn').disabled = true;
+    }
+    
+    is_test_over();
+}
+
+function is_test_over(){
+	if(ques_covered > max_ques){
+    	document.getElementById('c_btn').disabled = true;
+    	document.getElementById('w_btn').disabled = true;
+    	document.getElementById('s_btn').disabled = true;
+    	document.getElementById('undo_btn').disabled = true;
+    	document.getElementById('qnoCounter').innerHTML = max_ques;
+    	alert('Your test evalution is completed! You Acquired ' + total_score + ' marks!');
+        return false;
+    }
+}
+
+function save_changed_val(type, value){
+	if(value == ''){
+    	alert('Value must not be blank');
+        return false;
+    }if(value < 0){
+    	alert('Value must be greater than 0');
+        return false;
+    }
+    if(confirm('Changing value will reset the current Evaluation score. Do you want to save?')){
+
+      if(type=='inc'){
+          inc = value;
+          document.getElementById('inc_value').innerHTML = value;
+          document.getElementById('c_info_display').style.display = 'inline-block';
+          document.getElementById('c_info_edit').style.display = 'none';
+      }else if(type=='dec'){
+          dec = value;
+          document.getElementById('dec_value').innerHTML = value;
+          document.getElementById('w_info_display').style.display = 'inline-block';
+          document.getElementById('w_info_edit').style.display = 'none';
+      }else if(type=='max_ques'){
+          max_ques = value;;
+          document.getElementById('max_ques_value').innerHTML = value;
+          document.getElementById('mq_info_display').style.display = 'inline-block';
+          document.getElementById('mq_info_edit').style.display = 'none';
+      }else{
+          alert('Please Reload');
+      }
+      
+      start_calc();
+      
+    }else{
+    	return false;
+    }
+}
+
+function showEditDiv(type){
+	if(type=='inc'){
+        document.getElementById('inc_value').innerHTML = '';
+    	document.getElementById('c_info_display').style.display = 'none';
+    	document.getElementById('c_info_edit').style.display = 'inline-block';
+    }else if(type=='dec'){
+        document.getElementById('dec_value').innerHTML = '';
+    	document.getElementById('w_info_display').style.display = 'none';
+    	document.getElementById('w_info_edit').style.display = 'inline-block';
+    }else if(type=='max_ques'){
+        document.getElementById('max_ques_value').innerHTML = '';
+    	document.getElementById('mq_info_display').style.display = 'none';
+    	document.getElementById('mq_info_edit').style.display = 'inline-block';
+    }else{
+    	alert('Please Reload');
+    }
+}
+
+function undo_last_calc(){
+    try{
+    	if(action_stack.length > 0){
+          var last_action = action_stack[action_stack.length-1];
+
+          if(last_action == 'inc' && ques_covered > 1){
+              ques_covered -= 1;
+              total_correct_questions -= 1;
+              total_score -= Number(inc);
+
+
+              document.getElementById('qnoCounter').innerHTML = ques_covered;
+              document.getElementById('cqCounter').innerHTML = total_correct_questions;
+              document.getElementById('current_score').innerHTML = total_score;
+
+
+          }else if(last_action == 'dec' && ques_covered > 1){
+            ques_covered -= 1;
+            total_incorrect_questions -= 1;
+            total_score = total_score + Number(dec);
+
+            document.getElementById('qnoCounter').innerHTML = ques_covered;
+            document.getElementById('wqCounter').innerHTML = total_incorrect_questions;
+            document.getElementById('current_score').innerHTML = total_score;
+
+          }else if(last_action == 'skip' && ques_covered > 1){
+            ques_covered -= 1;
+            total_skipped -= 1;
+
+
+            document.getElementById('qnoCounter').innerHTML = ques_covered;
+            document.getElementById('sqCounter').innerHTML = total_skipped;
+
+
+          }else{
+              alert('No actions taken that could be undone.');
+          }
+          action_stack.pop();
+          
+          if(action_stack.length == 0){
+          	document.getElementById('undo_btn').disabled = true;
+          }
+          
+		}else{
+        	alert('No actions taken that could be undone.');
+        }
+        
+        
+    }catch(e){
+    	alert(e);
+    }
+}
+
+
+</script>
+</head>
+<body>
+<div class="container cont-div">
+	<div class="row mt-5 mb-5">
+    	<div class="col-sm-12 text-center text-dark">
+        	<h1 style="color:#000;">Answersheet Evaluation Helper</h1>
+        </div>
+    </div>
+  <div class="row mt-3">
+      <div class="col-sm-1">
+      </div>
+      <div class="col-sm-3">
+          <span>Current Question No.</span>
+      </div>
+      <div class="col-sm-3">
+          <span id="qnoCounter">0</span>
+      </div>
+      <div class="col-sm-3">
+          Max. Questions: 
+              <span id="max_ques_value"></span>
+              <span id="mq_info_display" style="display: inline-block">
+                  <i class="fas fa-edit" onclick="showEditDiv('max_ques');"></i>
+              </span>
+              <span id="mq_info_edit" style="display: none">
+                  <input type="number" id="new_max_ques" style="width:30%"></input> 
+                  <i class="fas fa-save" onclick="save_changed_val('max_ques', document.getElementById('new_max_ques').value)"></i>
+              </span>
+      </div>
+  </div>
+
+  <div class="row mt-3">
+      <div class="col-sm-1">
+      </div>
+      <div class="col-sm-3">
+          <span>Correct Questions:</span>
+      </div>
+      <div class="col-sm-2 text-success score">
+          <span id="cqCounter">0</span>
+      </div>
+  </div>
+  <div class="row mt-3">
+      <div class="col-sm-1">
+      </div>
+      <div class="col-sm-3">
+          <span>Incorrect Questions:</span>
+      </div>
+      <div class="col-sm-2 text-danger score">
+          <span id="wqCounter">0</span>
+      </div>
+  </div>
+  <div class="row mt-3">
+      <div class="col-sm-1">
+      </div>
+      <div class="col-sm-3">
+          <span>Skipped Questions:</span>
+      </div>
+      <div class="col-sm-2 score" style="color:#0d5673;">
+          <span id="sqCounter">0</span>
+      </div>
+  </div>
+  <div class="row mt-3">
+      <div class="col-sm-1">
+      </div>
+      <div class="col-sm-3">
+          <span>Current Score:</span>
+      </div>
+      <div class="col-sm-2 score">
+          <span id="current_score">0</span>
+      </div>
+  </div>
+
+  <div class="row mt-5">
+      <div class="col-sm-1">
+      </div>
+      <div class="col-sm-2">
+          <button class="btn btn-md btn-outline-success" id="c_btn" onclick="add_correct()">
+           <i class="fas fa-check"></i> Correct
+          </button>
+      </div>
+      <div class="col-sm-2">
+          <button class="btn btn-md btn-outline-danger" id="w_btn" onclick="add_incorrect()">
+          <i class="fas fa-times"></i> Incorrect
+          </button>
+      </div>
+      <div class="col-sm-3">
+          <button class="btn btn-md btn-outline-warning" id="s_btn" onclick="skip()">
+          <i class="fa-solid fa-share"></i> Not Attempted
+          </button>
+      </div>
+      <div class="col-sm-2">
+          <button class="btn btn-md btn-outline-dark" id="undo_btn" onclick="undo_last_calc()">
+          <i class="fa-solid fa-arrow-rotate-left"></i> Undo
+          </button>
+      </div>
+      <div class="col-sm-2">
+          <button class="btn btn-md btn-outline-success" onclick="start_calc()">Start/Reset</button>
+      </div>
+  </div>
+  <div class="col-sm-12">
+    <div class="container alert alert-info mt-3 mb-4" style="margin-bottom: 200px;">
+      <div class="row">
+          <div class="col-sm-12">
+              <span>Scoring:</span>
+          </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-12">
+            <ul style="list-type:disc;">
+              <li>Correct Answer: +
+                <span id="inc_value">1</span>
+                <span id="c_info_display" style="display: inline-block">
+                    <i class="fas fa-edit" onclick="showEditDiv('inc');"></i>
+                </span>
+                <span id="c_info_edit" style="display: none">
+                    <input type="number" id="new_inc" style="width:30%"></input> 
+                    <i class="fas fa-save" onclick="save_changed_val('inc', document.getElementById('new_inc').value)"></i>
+                </span>
+              </li>
+              <li>Incorrect Answer: -
+                <span id="dec_value">0.25</span>
+                <span id="w_info_display" style="display: inline-block">
+                    <i class="fas fa-edit" onclick="showEditDiv('dec');"></i>
+                </span>
+                <span id="w_info_edit" style="display: none">
+                    <input type="number" id="new_dec" style="width:30%"></input> 
+                    <i class="fas fa-save" onclick="save_changed_val('dec', document.getElementById('new_dec').value)"></i>
+                </span>
+              </li>
+              <li>Skipped: No Penalty </li>
+            </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+  	<div class="col-sm-12 text-end" style="background-color:#eaeaea; color:#828282">
+    	Made By Abhijeet Mishra
+    </div>
+  </div>
+</div>	<!--container div end-->
+</body>
+</html>
+
+
