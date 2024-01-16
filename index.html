@@ -76,6 +76,10 @@ function start_calc(){
     document.getElementById('wqCounter').innerHTML = total_incorrect_questions;
     document.getElementById('sqCounter').innerHTML = total_skipped;
     document.getElementById('current_score').innerHTML = total_score;
+    document.getElementById('qnoCounter_prev').innerHTML = ques_covered;
+    document.getElementById('ques_prompt').style.display = "inline-block";
+    document.getElementById('result_prompt').style.display = "none";
+    document.getElementById('result').innerHTML = '';
     
     document.getElementById('c_btn').disabled = false;
     document.getElementById('w_btn').disabled = false;
@@ -90,6 +94,7 @@ function add_correct(){
     total_score += Number(inc);
     
     document.getElementById('qnoCounter').innerHTML = ques_covered;
+    document.getElementById('qnoCounter_prev').innerHTML = ques_covered;
     document.getElementById('cqCounter').innerHTML = total_correct_questions;
     document.getElementById('current_score').innerHTML = total_score;
     
@@ -110,6 +115,7 @@ function add_incorrect(){
     total_score = total_score - (dec);
     
     document.getElementById('qnoCounter').innerHTML = ques_covered;
+    document.getElementById('qnoCounter_prev').innerHTML = ques_covered;
     document.getElementById('wqCounter').innerHTML = total_incorrect_questions;
     document.getElementById('current_score').innerHTML = total_score;
     
@@ -129,6 +135,7 @@ function skip(){
     total_skipped += 1;
     
     document.getElementById('qnoCounter').innerHTML = ques_covered;
+    document.getElementById('qnoCounter_prev').innerHTML = ques_covered;
     document.getElementById('sqCounter').innerHTML = total_skipped;
     
     action_stack.push('skip');
@@ -149,7 +156,11 @@ function is_test_over(){
     	document.getElementById('s_btn').disabled = true;
     	document.getElementById('undo_btn').disabled = true;
     	document.getElementById('qnoCounter').innerHTML = max_ques;
+    	document.getElementById('result').innerHTML = total_score;
+    	document.getElementById('ques_prompt').style.display = "none";
+    	document.getElementById('result_prompt').style.display = "inline-block";
     	alert('Your test evalution is completed! You Acquired ' + total_score + ' marks!');
+        
         return false;
     }
 }
@@ -175,7 +186,7 @@ function save_changed_val(type, value){
           document.getElementById('w_info_display').style.display = 'inline-block';
           document.getElementById('w_info_edit').style.display = 'none';
       }else if(type=='max_ques'){
-          max_ques = value;;
+          max_ques = value;
           document.getElementById('max_ques_value').innerHTML = value;
           document.getElementById('mq_info_display').style.display = 'inline-block';
           document.getElementById('mq_info_edit').style.display = 'none';
@@ -220,6 +231,7 @@ function undo_last_calc(){
 
 
               document.getElementById('qnoCounter').innerHTML = ques_covered;
+           	  document.getElementById('qnoCounter_prev').innerHTML = ques_covered;
               document.getElementById('cqCounter').innerHTML = total_correct_questions;
               document.getElementById('current_score').innerHTML = total_score;
 
@@ -230,6 +242,7 @@ function undo_last_calc(){
             total_score = total_score + Number(dec);
 
             document.getElementById('qnoCounter').innerHTML = ques_covered;
+            document.getElementById('qnoCounter_prev').innerHTML = ques_covered;
             document.getElementById('wqCounter').innerHTML = total_incorrect_questions;
             document.getElementById('current_score').innerHTML = total_score;
 
@@ -239,6 +252,7 @@ function undo_last_calc(){
 
 
             document.getElementById('qnoCounter').innerHTML = ques_covered;
+            document.getElementById('qnoCounter_prev').innerHTML = ques_covered;
             document.getElementById('sqCounter').innerHTML = total_skipped;
 
 
@@ -335,6 +349,14 @@ function undo_last_calc(){
   </div>
 
   <div class="row mt-5">
+  		<div class="col-sm-1"></div>
+      <div class="col-sm-11 text-danger">
+      	<span id="ques_prompt" style="display:none">Choose a value for Question #<span id="qnoCounter_prev"></span></span>
+        <span id="result_prompt" style="display:none">Your test evalution is completed! You Acquired <span id="result"></span> marks!</span>
+      </div>
+  </div>
+  
+  <div class="row mt-2">
       <div class="col-sm-1">
       </div>
       <div class="col-sm-2">
@@ -361,6 +383,8 @@ function undo_last_calc(){
           <button class="btn btn-md btn-outline-success" onclick="start_calc()">Start/Reset</button>
       </div>
   </div>
+  
+  
   <div class="col-sm-12">
     <div class="container alert alert-info mt-3 mb-4" style="margin-bottom: 200px;">
       <div class="row">
@@ -393,8 +417,14 @@ function undo_last_calc(){
               </li>
               <li>Skipped: No Penalty </li>
             </ul>
+        </div>	<!-- col ends-->
+      </div>	<!-- row ends-->
+      <div class="row">
+        <div class="col-sm-12">
+            <span id="info_promt">Start the test by Clicking on "Start/Reset" or by changing the "Max. Questions", Score value for Correct Answer, or Penalty value for a wrong answer</span>
         </div>
-      </div>
+  	  </div>
+      
     </div>
   </div>
   <div class="row">
@@ -402,9 +432,16 @@ function undo_last_calc(){
     	Made By Abhijeet Mishra
     </div>
   </div>
+  <div class="row mt-3">
+  	<div class="col-sm-12 text-center">
+    	<hr style="width:80%;margin-left: auto;margin-right: auto;">
+    </div>
+  </div>
+  <div class="row mb-3">
+  	<div class="col-sm-12 text-center">
+    	<br>
+    </div>
+  </div>
 </div>	<!--container div end-->
 </body>
 </html>
-
-
-
